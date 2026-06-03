@@ -11,17 +11,25 @@
             background-color: #f4f6f9;
         }
 
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
         .card {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
+            flex: 1;
         }
 
-        h1 {
+        h1,
+        h3 {
             color: #333;
+            margin-top: 0;
         }
 
         .sub-item {
@@ -39,30 +47,98 @@
             font-weight: bold;
             color: #2ecc71;
         }
+
+        /* Form Layout Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 
 <body>
 
-    <div class="card">
-        <h1>Welcome to your TrackMyStack Dashboard</h1>
-        <p>Logged in as: <strong>{{ request.user.username }}</strong></p>
-        <hr>
+    <div class="container">
 
-        <h3>Your Tracked Subscriptions</h3>
+        <div class="card">
+            <h1>TrackMyStack Dashboard</h1>
+            <p>Logged in as: <strong>{{ request.user.username }}</strong></p>
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
-        {% if subscriptions %}
-        <div>
-            {% for sub in subscriptions %}
-            <div class="sub-item">
-                <span><strong>{{ sub.name }}</strong> ({{ sub.get_billing_cycle_display }})</span>
-                <span class="price">${{ sub.cost }}</span>
+            <h3>Your Tracked Subscriptions</h3>
+            {% if subscriptions %}
+            <div>
+                {% for sub in subscriptions %}
+                <div class="sub-item">
+                    <span><strong>{{ sub.name }}</strong> ({{ sub.get_billing_cycle_display }})</span>
+                    <span class="price">${{ sub.cost }}</span>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% else %}
+            <p>You aren't tracking any subscriptions yet! Add one using the form on the right.</p>
+            {% endif %}
         </div>
-        {% else %}
-        <p>You aren't tracking any subscriptions yet! Add one in the admin panel.</p>
-        {% endif %}
+
+        <div class="card">
+            <h3>Add New Subscription</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Subscription Name:</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="form-group">
+                    <label>Cost (per cycle):</label>
+                    {{ form.cost }}
+                </div>
+
+                <div class="form-group">
+                    <label>Billing Cycle:</label>
+                    {{ form.billing_cycle }}
+                </div>
+
+                <div class="form-group">
+                    <label>Next Renewal Date (YYYY-MM-DD):</label>
+                    {{ form.next_renewal_date }}
+                </div>
+
+                <button type="submit" class="btn">Save Subscription</button>
+            </form>
+        </div>
 
     </div>
 
