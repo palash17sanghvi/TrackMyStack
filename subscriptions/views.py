@@ -2,30 +2,60 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .models import Subscription
 from .forms import SubscriptionForm
+from decimal import Decimal  # for the mathematics precision
 
 
 @login_required
 def dashboard_view(request):
-    # CASE 1: User submitted the form to add a new subscription
+    # write
     if request.method == 'POST':
-        form = SubscriptionForm(request.POST)  # Load form with submitted data
-
-        if form.is_valid():  # Trigger automatic validation & data cleaning
-            new_subscription = form.save(commit=False)  # Hold the save process
-            new_subscription.user = request.user       # Lock current user as the owner
-            new_subscription.save()                    # Write row to SQLite database
-
-            # Refresh page to reset request to GET
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            new_subscription = form.save(commit=False)
+            new_subscription.user = request.user
+            new_subscription.save()
             return redirect('dashboard')
-
-    # CASE 2: User is just loading or refreshing the page
     else:
-        form = SubscriptionForm()  # Generate an empty form for the UI
+        # read
+        form = SubscriptionForm()
 
-    # Always pull current user's data and load the interface
     user_subscriptions = Subscription.objects.filter(user=request.user)
+
+    # mathematics
+    total_monthly = Decimal('0.00')
+    sub_count = user_subscriptions.count()
+
+    for sub in user_subscriptions:
+        if sub.billing_cycle == 'weekly':
+            total_monthly += sub.cost * Decimal('52') / Decimal('12')
+        elif sub.billing_cycle == 'monthly':
+            total_monthly += sub.cost
+        elif sub.billing_cycle == 'yearly':
+            total_monthly += sub.cost / Decimal('12')
+
+    annual_projection = total_monthly * Decimal('12')
+
+    # rounding the decimal according to the format in the template
+    total_monthly = round(total_monthly, 2)
+    annual_projection = round(annual_projection, 2)
+
     context = {
         'subscriptions': user_subscriptions,
-        'form': form
+        'form': form,
+        'sub_count': sub_count,
+        'total_monthly': total_monthly,
+        'annual_projection': annual_projection,
     }
     return render(request, 'subscriptions/dashboard.html', context)
+
+
+@login_required
+def delete_subscription_view(request, sub_id):
+    # find the subscription to delete
+    chosen_sub = Subscription.objects.get(id=sub_id, user=request.user)
+
+    # 2. Destroy it
+    chosen_sub.delete()
+
+    # 3. refresh
+    return redirect('dashboard')
