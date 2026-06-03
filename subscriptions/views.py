@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
 from .models import Subscription
 from .forms import SubscriptionForm
 from decimal import Decimal  # for the mathematics precision
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 @login_required
@@ -59,3 +59,26 @@ def delete_subscription_view(request, sub_id):
 
     # 3. refresh
     return redirect('dashboard')
+
+
+@login_required
+def update_subscription_view(request, sub_id):
+    # find the subscription
+    sub_to_edit = get_object_or_404(Subscription, id=sub_id, user=request.user)
+
+    # inside update
+    if request.method == 'POST':
+        form = SubscriptionForm(request.POST, instance=sub_to_edit)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+
+    # print out the current subscription we want to edit in a new form
+    else:
+        form = SubscriptionForm(instance=sub_to_edit)
+
+    context = {
+        'form': form,
+        'subscription': sub_to_edit,
+    }
+    return render(request, 'subscriptions/update.html', context)

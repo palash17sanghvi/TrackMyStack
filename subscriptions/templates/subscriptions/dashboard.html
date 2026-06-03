@@ -93,6 +93,30 @@
             color: #2ecc71;
         }
 
+        /* Action Buttons Container Layout */
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* Clean Edit Button Styling */
+        .edit-btn {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 5px 10px;
+            border: 1px solid #3498db;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .edit-btn:hover {
+            background-color: #3498db;
+            color: white;
+        }
+
         /* Clean Delete Button Styling */
         .delete-btn {
             color: #e74c3c;
@@ -179,10 +203,16 @@
                             <strong>{{ sub.name }}</strong> ({{ sub.get_billing_cycle_display }}) -
                             <span class="price">${{ sub.cost }}</span>
                         </div>
-                        <a href="{% url 'delete_subscription' sub.id %}" class="delete-btn"
-                            onclick="return confirm('Are you sure you want to remove {{ sub.name }}?');">
-                            Delete
-                        </a>
+                        <div class="actions-cell">
+                            <!-- Secure Update Gateway Routing Link -->
+                            <a href="{% url 'update_subscription' sub.id %}" class="edit-btn">
+                                Edit
+                            </a>
+                            <a href="{% url 'delete_subscription' sub.id %}" class="delete-btn"
+                                onclick="return confirm('Are you sure you want to remove {{ sub.name }}?');">
+                                Delete
+                            </a>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
