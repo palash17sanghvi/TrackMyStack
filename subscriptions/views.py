@@ -1,12 +1,17 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render, redirect, get_object_or_404
+from decimal import Decimal  # for the mathematics precision
 from .models import Subscription
 from .forms import SubscriptionForm
-from decimal import Decimal  # for the mathematics precision
-from django.shortcuts import render, redirect, get_object_or_404
 
 
 @login_required
 def dashboard_view(request):
+    # THE NEW BOUNCER: Kick unverified users to the 2FA setup wizard
+    if not request.user.is_verified():
+        return redirect('two_factor:setup')
+
     # write
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
@@ -51,8 +56,12 @@ def dashboard_view(request):
 
 @login_required
 def delete_subscription_view(request, sub_id):
+    # THE NEW BOUNCER: Kick unverified users to the 2FA setup wizard
+    if not request.user.is_verified():
+        return redirect('two_factor:setup')
+
     # find the subscription to delete
-    chosen_sub = Subscription.objects.get(id=sub_id, user=request.user)
+    chosen_sub = get_object_or_404(Subscription, id=sub_id, user=request.user)
 
     # 2. Destroy it
     chosen_sub.delete()
@@ -63,6 +72,10 @@ def delete_subscription_view(request, sub_id):
 
 @login_required
 def update_subscription_view(request, sub_id):
+    # THE NEW BOUNCER: Kick unverified users to the 2FA setup wizard
+    if not request.user.is_verified():
+        return redirect('two_factor:setup')
+
     # find the subscription
     sub_to_edit = get_object_or_404(Subscription, id=sub_id, user=request.user)
 
@@ -82,3 +95,20 @@ def update_subscription_view(request, sub_id):
         'subscription': sub_to_edit,
     }
     return render(request, 'subscriptions/update.html', context)
+
+
+def register_view(request):
+    # 1. The user hands in the filled paperwork
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('two_factor:login')  # Send them to the vault gate!
+
+    # 2. The user walks up empty-handed
+    else:
+        form = UserCreationForm()
+
+    # 3. Hand them the clipboard (render the template)
+    return render(request, 'subscriptions/register.html', {'form': form})

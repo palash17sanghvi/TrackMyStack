@@ -7,4 +7,5 @@ urlpatterns = [
          views.delete_subscription_view, name='delete_subscription'),
     path('dashboard/update/<int:sub_id>/',
          views.update_subscription_view, name='update_subscription'),
+    path('register/', views.register_view, name='register'),
 ]
