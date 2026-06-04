@@ -67,8 +67,13 @@
             {% csrf_token %}
             {{ wizard.management_form }}
             <div class="form-group">{{ wizard.form.as_p }}</div>
-            <button type="submit" class="btn">{% if wizard.steps.current == 'auth' %}Login{% else %}Verify{% endif
-                %}</button>
+            <button type="submit" class="btn">
+                {% if wizard.steps.current == 'auth' %}
+                Login
+                {% else %}
+                Verify
+                {% endif %}
+            </button>
         </form>
     </div>
 </body>
