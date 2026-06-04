@@ -1,1 +1,15 @@
+# Virtual Environment
 venv/
+
+# Django Database (CRITICAL to ignore)
+db.sqlite3
+
+# Python Cache (Compiled files you don't need on GitHub)
+__pycache__/
+*.pyc
+
+# Mac OS System Files
+.DS_Store
+
+# Environment Variables (If you add API keys later)
+.env
