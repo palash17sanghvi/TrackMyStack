@@ -21,7 +21,7 @@ Managing multiple software services often leads to "subscription creep." TrackMy
 
 **1. Clone the repository**
 
-    git clone [https://github.com/palash17sanghvi/TrackMyStack.git](https://github.com/palash17sanghvi/TrackMyStack.git)
+    git clone https://github.com/palash17sanghvi/TrackMyStack
     cd TrackMyStack
 
 **2. Set up the environment**
